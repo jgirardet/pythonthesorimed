@@ -1,12 +1,14 @@
+# Standard Libraries
 import io
 import re
 from pathlib import Path
 
+# Third Party Libraries
 import pytest
-from parseur.parseur import NB_API, ThesorimedApiParseur
-from parseur.prototype import appel_character, appel_refcursor, connect, intro
+from parseur.parseur import ThesorimedApiParseur
+from parseur.prototype import import_and_nametupple_def, intro
 
-from .gabarit import apicleaned, cleaned, written_func, extracted, lines
+from .gabarit import cleaned, extracted, lines, thesoapi_test
 
 
 class TestThesorimedAPiParseur:
@@ -41,7 +43,7 @@ class TestThesorimedAPiParseur:
 
     def test_read_lines_nb(self, parseur):
         parseur.read_lines()
-        assert len(parseur.lignes_lues) == NB_API
+        assert len(parseur.lignes_lues) == 4
 
     def test_LIGNE_MOTIF(self, parseur):
         assert parseur.ligne_motif.islower()
@@ -101,31 +103,24 @@ class TestThesorimedAPiParseur:
         p.clean_func_name()
         p.clean_params()
         p.clean_retour()
-        p.create_apicleaned()
-        assert p.apicleaned[0].name == cleaned[0][0]
-        assert p.apicleaned[0].params[0] == cleaned[0][1][0]
-        assert p.apicleaned[0].params[0] == cleaned[0][1][0]
-        assert p.apicleaned[0].params[1] == cleaned[0][1][1]
-        assert p.apicleaned[0].retour == cleaned[0][2]
+        p.create_procapi()
+        assert p.thesoapi == thesoapi_test
 
     def test_clean_all(self, parseur_gabarit_extracted):
         p = parseur_gabarit_extracted
         p.clean_all()
-        assert p.apicleaned == apicleaned
+        assert p.thesoapi == thesoapi_test
 
-    def test_write_base(self, parseur):
-        parseur.write_base()
-        assert parseur.stream == intro + connect + appel_refcursor + appel_character
-
-    def test_write_func(self, parseur):
-        parseur.apicleaned = apicleaned
-        parseur.stream = ""
-        parseur.write_func()
-        assert parseur.stream == written_func
+    def test_write_base(self, parseur_gabarit_extracted):
+        p = parseur_gabarit_extracted
+        p.clean_all()
+        p.write_base()
+        assert p.stream == intro + import_and_nametupple_def + "thesoapi = " + str(
+            thesoapi_test)
 
     def test_write_to_file(self, parseur, tmpdir_factory):
         parseur.save_api_dir = tmpdir_factory.getbasetemp().__str__()
-        parseur.apicleaned = apicleaned
+        parseur.thesoapi = thesoapi_test
         parseur.stream = "gf f hgj hg j hkk "
         parseur.write_to_file()
         a = Path(parseur.save_api_dir) / parseur.save_api_name
@@ -134,8 +129,10 @@ class TestThesorimedAPiParseur:
     def test_create_thesorimed(self, tmpdir_factory):
         a = ThesorimedApiParseur(
             fichier=io.StringIO(lines),
-            save_api_dir=tmpdir_factory.getbasetemp().__str__())
+            save_api_dir=tmpdir_factory.getbasetemp().__str__(),
+            nb_api=4)
         a.create_thesorimed()
         b = Path(a.save_api_dir) / a.save_api_name
         assert b.read_text(
-        ) == intro + connect + appel_refcursor + appel_character + written_func
+        ) == intro + import_and_nametupple_def + "thesoapi = " + str(
+            thesoapi_test)

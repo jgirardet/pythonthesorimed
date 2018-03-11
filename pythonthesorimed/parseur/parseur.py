@@ -1,69 +1,25 @@
+# Standard Libraries
 import io
 import re
 from collections import namedtuple
 from pathlib import Path
-from .prototype import intro, connect, appel_character, appel_refcursor, base_func
 
-THESORIMED_API = Path(__file__).parent / "api.sql"
-THESORIMED_API = str(THESORIMED_API.absolute())
+# pythonthesorimed
+from pythonthesorimed.exceptions import ThesorimedParseurError
+
+from .prototype import import_and_nametupple_def, intro
+
+VERSION_API = 2.00
+
 LIGNE_MOTIF = "CREATE OR REPLACE FUNCTION "
 
-NB_API = 131
+NB_API = 130  # dans la version 2, get_the_hyper_to_spe est défini 2 fois
 
-SAVE_API_DIR = "../build"
+SAVE_API_DIR = str(Path(__file__).parents[1])
+
 SAVE_API_NAME = "api.py"
-"""
 
-Crrer une app lanceur du parsing
-parseur nb_api fichier.sql
-
-
-Creer :
-
-func.py
-ThesoProc =  namedtupple("ThesoProc", "name, genre, params")
-
-funcs : {
-    name: ThesoProc(name, genre, params), etc
-    }
-
-
-from funcs import funcs
-
-class ThesoItem:
-    def __init__(self, cip):
-        self.cip = cip
-
-    def _appel_char
-    def _connection
-    def _ appel_cursor
-    def _select_appel
-
-    @property
-    def mographie
-
-    def proc(self, name, reqete):
-        connect
-        attributes = list_func['name']
-        return  selectappel(genre)(attr.name, requete, attr.params)
-
-usage dans Django:
-
-from theso import ThesoItem
-
-class Medicament:
-    name
-    cip
-
-    detail(self, name, req):
-        a = ThesoItem(self.cip)
-        return a.proc(name, req)
-
-    def monographie:
-        retruen a.ThesoItem(self.cip).monographe
-
-
-"""
+ProcApi = namedtuple("ProcApi", ['name', 'input_type', 'genre'])
 
 
 class ThesorimedApiParseur:
@@ -73,26 +29,28 @@ class ThesorimedApiParseur:
     """
 
     def __init__(self,
-                 fichier=THESORIMED_API,
-                 ligne_motif=LIGNE_MOTIF,
+                 fichier,
                  save_api_dir=SAVE_API_DIR,
-                 save_api_name=SAVE_API_NAME):
+                 ligne_motif=LIGNE_MOTIF,
+                 save_api_name=SAVE_API_NAME,
+                 nb_api=NB_API):
         """
         fichier : cheminr vers l'api.sql
         api : dictionnaire qui contiendra nom/params/retour des fonctions
         ligne_motif : LIGNE_MOTIF des parametres
         """
         self.fichier = fichier
-        self.api = {}  #on initialise l'api de base
+        self.api = {}  # on initialise l'api de base
         self.ligne_motif = ligne_motif.lower()
         self.save_api_dir = save_api_dir
-        self.save_api_name = SAVE_API_NAME
+        self.nb_api = nb_api
+        self.save_api_name = save_api_name
 
     def read_lines(self):
         """
         collecte chaque ligne de déclaration d'api selon motif
         """
-        if isinstance(self.fichier, io.StringIO):  #monkeypatch dont like open
+        if isinstance(self.fichier, io.StringIO):  # monkeypatch dont like open
             f = self.fichier
         else:
             f = open(self.fichier)
@@ -123,14 +81,14 @@ class ThesorimedApiParseur:
         self.extracted = x
 
     def clean_func_name(self):
-        #remove "thesorimds"
+        # remove "thesorimds"
         cle = 'thesorimed.'
         for f in self.extracted:
             if cle in f[0]:
                 f[0] = f[0][len(cle):]
 
     def clean_params(self):
-        #change numeric with int, varchar to str
+        # change numeric with int, varchar to str
         for f in self.extracted:
             sp = f[1].split(',')
             l = []
@@ -154,37 +112,30 @@ class ThesorimedApiParseur:
                 raise Exception(
                     "le Retour d'entrée n'est pas connu pour {} ".format(f[0]))
 
-    def create_apicleaned(self):
-        #turn extracted to namedtupple for convinience
-        self.apicleaned = []
-        ApiCleaned = namedtuple("ApiCleaned", ['name', 'params', 'retour'])
+    def create_procapi(self):
+        # turn extracted to namedtupple for convinience
+        self.thesoapi = {}
         for i in self.extracted:
-            self.apicleaned.append(ApiCleaned(i[0], i[1], i[2]))
+            # if i[0] in self.thesoapi:
+            #     raise Exception(i[0])
+            self.thesoapi[i[0]] = (ProcApi(i[0], i[1], i[2]))
+        if len(self.thesoapi) != self.nb_api:
+            raise ThesorimedParseurError(
+                f'Le nombre Api attendu ({self.nb_api}) ne correspond pas : {len(self.thesoapi)}'
+            )
 
     def clean_all(self):
-        #run all cleaning function
+        # run all cleaning function
         self.clean_func_name()
 
         self.clean_params()
         self.clean_retour()
-        self.create_apicleaned()
+        self.create_procapi()
 
     def write_base(self):
-        #pick base function
-        chaine = intro + connect + appel_refcursor + appel_character
-        self.stream = chaine
-
-    def write_func(self):
-        #write function returnnong character
-        for i in self.apicleaned:
-            if i.retour == "char":
-                ch = base_func.format(
-                    name=i.name, appel="appel_character", params=i.params)
-                self.stream = self.stream + ch
-            elif i.retour == "cursor":
-                ch = base_func.format(
-                    name=i.name, appel="appel_refcursor", params=i.params)
-                self.stream = self.stream + ch
+        # debut du fichier final
+        chaine = intro + import_and_nametupple_def
+        self.stream = chaine + "thesoapi = " + str(self.thesoapi)
 
     def write_to_file(self):
         path = Path(self.save_api_dir)
@@ -194,11 +145,10 @@ class ThesorimedApiParseur:
 
     def write_api(self):
         self.write_base()
-        self.write_func()
         self.write_to_file()
 
     def create_thesorimed(self):
-        #run the whole process
+        # run the whole process
         self.read_lines()
         self.extraction()
         self.clean_all()
@@ -207,10 +157,5 @@ class ThesorimedApiParseur:
 
 def main():
     import sys
-    a = ThesorimedApiParseur(fichier=sys.argv[1], save_api_dir=sys.argv[2])
+    a = ThesorimedApiParseur(fichier=sys.argv[1])
     a.create_thesorimed()
-
-
-# if __name__ == '__main__':
-#     parse = ThesorimedApiParseur(fichier='api.py', save_api_dir='.')
-#     parse.create_thesorimed()
