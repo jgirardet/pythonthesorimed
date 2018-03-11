@@ -3,8 +3,8 @@ import re
 from pathlib import Path
 
 import pytest
-from parseur import NB_API, ThesorimedApiParseur
-from prototype import appel_character, appel_refcursor, connect, intro
+from parseur.parseur import NB_API, ThesorimedApiParseur
+from parseur.prototype import appel_character, appel_refcursor, connect, intro
 
 from .gabarit import apicleaned, cleaned, written_func, extracted, lines
 

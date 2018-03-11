@@ -1,17 +1,18 @@
 [[source]]
+
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 
+
 [dev-packages]
-flake8 = "*"
+
+"flake8" = "*"
 pycodestyle = "*"
 yapf = "*"
 isort = "*"
-autopep8 = "*"
-
+"autopep8" = "*"
 cryptography = "*"
-PyYAML = "*"
-
+pyyaml = "*"
 pytest = "*"
 pytest-cov = "*"
 tox = "*"
@@ -24,9 +25,7 @@ pytest-pythonpath = "*"
 pytest-timeit = "*"
 
 
-
-
 [packages]
+
 pbr = ">=3.0"
-
-
+"psycopg2-binary" = "*"

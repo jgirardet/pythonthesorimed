@@ -1,16 +1,14 @@
 import copy
 
 import pytest
-from parseur import ThesorimedApiParseur
-
+from parseur.parseur import ThesorimedApiParseur
 from .gabarit import extracted
 from pathlib import Path
 
 
 @pytest.fixture(scope='function', autouse=True)
 def parseur():
-    return ThesorimedApiParseur(
-        fichier=Path(__file__).parent / "api.sql").main()
+    return ThesorimedApiParseur(fichier=Path(__file__).parent / "api.sql")
 
 
 @pytest.fixture(scope='function', autouse=True)
