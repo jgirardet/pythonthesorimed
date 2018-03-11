@@ -23,9 +23,11 @@ sphinx = "*"
 sphinx-autobuild = "*"
 pytest-pythonpath = "*"
 pytest-timeit = "*"
+ipython = "*"
 
 
 [packages]
 
 pbr = ">=3.0"
 "psycopg2-binary" = "*"
+yapf = "*"

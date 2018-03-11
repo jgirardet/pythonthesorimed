@@ -1,3 +1,6 @@
+# Third Party Libraries
+from parseur.parseur import ProcApi
+
 lines = """
 CREATE OR REPLACE FUNCTION GET_THE_SPE_DETAILS (VARCHAR,NUMERIC) RETURNS REFCURSOR AS
 CREATE OR REPLACE FUNCTION thesorimed.get_cip (NUMERIC(6)) RETURNS character varying AS
@@ -22,28 +25,15 @@ cleaned = [
     ['get_the_anxio_spe', ['str', 'int'], 'cursor'],
 ]
 
-from collections import namedtuple
-
-ApiCleaned = namedtuple("ApiCleaned", ['name', 'params', 'retour'])
-apicleaned = [
-    ApiCleaned(
-        name='get_the_spe_details', params=['str', 'int'], retour='cursor'),
-    ApiCleaned(name='get_cip', params=['int6'], retour='char'),
-    ApiCleaned(name='get_frm', params=['int6'], retour='char'),
-    ApiCleaned(
-        name='get_the_anxio_spe', params=['str', 'int'], retour='cursor')
-]
-
-written_func = """
-def get_the_spe_details(*req):
-    return appel_refcursor("get_the_spe_details", req, ['str', 'int'])
-
-def get_cip(*req):
-    return appel_character("get_cip", req, ['int6'])
-
-def get_frm(*req):
-    return appel_character("get_frm", req, ['int6'])
-
-def get_the_anxio_spe(*req):
-    return appel_refcursor("get_the_anxio_spe", req, ['str', 'int'])
-"""
+thesoapi_test = {
+    'get_the_spe_details':
+    ProcApi(
+        name='get_the_spe_details', input_type=['str', 'int'], genre='cursor'),
+    'get_cip':
+    ProcApi(name='get_cip', input_type=['int6'], genre='char'),
+    'get_frm':
+    ProcApi(name='get_frm', input_type=['int6'], genre='char'),
+    'get_the_anxio_spe':
+    ProcApi(
+        name='get_the_anxio_spe', input_type=['str', 'int'], genre='cursor')
+}
