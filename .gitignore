@@ -56,3 +56,8 @@ doc/_build
 ChangeLog
 AUTHORS
 
+# pytest
+.pytest_cache/
+
+
+api.sql

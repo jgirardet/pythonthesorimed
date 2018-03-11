@@ -22,7 +22,7 @@ autopep8:
 	pipenv run autopep8 --in-place --recursive setup.py $(MODULE)
 
 yapf:
-	pipenv run yapf --style .yapf --recursive -i $(MODULE)
+	pipenv run yapf --recursive -i $(MODULE)
 
 checks:
 	pipenv check
@@ -96,6 +96,8 @@ clean-test: ## remove test and coverage artifacts
 	rm -f .coverage
 	rm -fr htmlcov/
 
+api:
+	pipenv run python build.py api.sql pythonthesorimed
 
 
 # aliases to gracefully handle typos on poor dev's terminal

@@ -292,9 +292,9 @@
         },
         "pipenv": {
             "hashes": [
-                "sha256:4b5036d2aad38fea9f770d9865b4cf94655bb48ebf85d7019d853e8ee16ca9e2"
+                "sha256:2ea412f921df2ad89de679d8b8daddd82ab16ade9e4cb0db5893e24440871415"
             ],
-            "version": "==11.3.2"
+            "version": "==11.5.2"
         },
         "pipenv-to-requirements": {
             "hashes": [
@@ -491,7 +491,6 @@
                 "sha256:39d88b533b422825d644087a21e78c45cf5af0ef7a99a1fc9fbb7b481e5c85b0",
                 "sha256:02f8102c2436bb03b3ee6dede1919d1dac8a427541652e5ec95171ec8adbc93a"
             ],
-            "markers": "python_version != '3.2'",
             "version": "==15.1.0"
         },
         "virtualenv-clone": {

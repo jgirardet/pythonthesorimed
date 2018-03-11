@@ -14,7 +14,7 @@ pythonthesorimed
    :alt: Pypi package
 
 
-Une interface python avec la base médicamenteuse thesorimed
+Interface python pour thesorimed
 
 
 * License : GNU General Public License v3 

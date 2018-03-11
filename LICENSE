@@ -2,7 +2,7 @@
 GNU GENERAL PUBLIC LICENSE
                       Version 3, 29 June 2007
 
-    Une interface python avec la base médicamenteuse thesorimed
+    Interface python pour thesorimed
     Copyright (C) 2018  Jimmy Girardet
 
     This program is free software: you can redistribute it and/or modify
