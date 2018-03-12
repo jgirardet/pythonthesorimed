@@ -1,11 +1,12 @@
 # Standard Libraries
 from collections.abc import Iterable
-from exceptions import ThesorimedError
 
 # Third Party Libraries
 import psycopg2
-from api import thesoapi
 from psycopg2.extras import NamedTupleCursor
+
+from .api import thesoapi
+from .exceptions import ThesorimedError
 
 
 class ThesoItem:
@@ -13,8 +14,13 @@ class ThesoItem:
     Base classe interface pour thesorimed
     """
 
-    @staticmethod
-    def _connect():
+    def __init__(self, host, dbname, user, password):
+        self.host = host
+        self.dbname = dbname
+        self.user = user
+        self.password = password
+
+    def _connect(self):
         """
         Base fonction to connect to database.
         Return a pscipg connection
@@ -22,7 +28,10 @@ class ThesoItem:
         """
         # raise NotImplementedError
         return psycopg2.connect(
-            host="127.0.0.1", dbname="thesorimed", user="j", password="j")
+            host=self.host,
+            dbname=self.dbname,
+            user=self.user,
+            password=self.password)
 
     def _appel_char(self, obj_api, req):
         """
@@ -38,8 +47,10 @@ class ThesoItem:
                 curs.execute("SET search_path TO thesorimed, public")
                 curs.callproc("thesorimed." + obj_api.name, req)
                 res = curs.fetchone()
-                cc = getattr(res, obj_api.name)
-                return cc
+                try:
+                    return getattr(res, obj_api.name).split(', ')
+                except AttributeError:
+                    return None
 
     def _appel_refcursor(self, obj_api, req):
         """
@@ -98,16 +109,15 @@ class ThesoItem:
                     raise ThesorimedError(
                         f"Longueur de requête limité à {longueur_champs}")
 
-    @classmethod
-    def proc(cls, name, *req):
+    def proc(self, name, *req):
         try:
             obj_api = thesoapi[name]
         except KeyError:
             raise ThesorimedError("La procédure appelé n'existe pas")
 
-        cls._valide_req(obj_api, req)
+        self._valide_req(obj_api, req)
 
-        return cls._appel_proc(cls, obj_api)(cls, obj_api, req)
+        return self._appel_proc(obj_api)(obj_api, req)
 
 
 """
