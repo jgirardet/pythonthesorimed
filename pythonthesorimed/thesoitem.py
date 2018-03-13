@@ -99,7 +99,7 @@ class ThesoItem:
                         "L'argument attendu est une liste d'entier")
 
         for x, y in zip(obj.input_type, req):
-            if x == 'int':
+            if x.startswith('int'):
                 if type(y) != int:
                     raise ThesorimedError("L'argument doit être un entier")
             import re
@@ -108,6 +108,7 @@ class ThesoItem:
                 if y > pow(10, int(longueur_champs[0])):
                     raise ThesorimedError(
                         f"Longueur de requête limité à {longueur_champs}")
+        return True
 
     def proc(self, name, *req):
         try:

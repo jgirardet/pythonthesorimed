@@ -41,6 +41,12 @@ test-unit:
 test-coverage:
 	pipenv run py.test  --cov $(MODULE) --cov-report term-missing --cov-report html
 
+test-local:
+	pipenv run pytest tests_local
+
+test-all:
+	pipenv run pytest tests tests_local
+
 requirements.txt:
 	
 	

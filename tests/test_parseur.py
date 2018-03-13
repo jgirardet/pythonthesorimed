@@ -5,8 +5,10 @@ from pathlib import Path
 
 # Third Party Libraries
 import pytest
-from parseur.parseur import ThesorimedApiParseur
-from parseur.prototype import import_and_nametupple_def, intro
+
+# pythonthesorimed
+from pythonthesorimed.parseur.parseur import ThesorimedApiParseur
+from pythonthesorimed.parseur.prototype import import_and_nametupple_def, intro
 
 from .gabarit import cleaned, extracted, lines, thesoapi_test
 
