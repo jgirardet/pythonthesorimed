@@ -4,7 +4,9 @@ import io
 
 # Third Party Libraries
 import pytest
-from parseur.parseur import ThesorimedApiParseur
+
+# pythonthesorimed
+from pythonthesorimed.parseur.parseur import ThesorimedApiParseur
 
 from .gabarit import extracted, lines
 

@@ -1,5 +1,5 @@
-# Third Party Libraries
-from parseur.parseur import ProcApi
+# pythonthesorimed
+from pythonthesorimed.parseur.parseur import ProcApi
 
 lines = """
 CREATE OR REPLACE FUNCTION GET_THE_SPE_DETAILS (VARCHAR,NUMERIC) RETURNS REFCURSOR AS
