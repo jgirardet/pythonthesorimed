@@ -48,8 +48,7 @@ test-coverage-all:
 	pipenv run py.test tests tests_local --cov $(MODULE) --cov-report term-missing --cov-report html
 
 requirements.txt:
-	
-	
+	pipenv run pipenv_to_requirements
 
 Pipfile.lock:	Pipfile
 	pipenv lock
