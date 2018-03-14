@@ -13,13 +13,10 @@ install-local:
 install-system:
 	pipenv install --system
 
-style: isort autopep8 yapf
+style: isort yapf
 
 isort:
 	pipenv run isort -y
-
-autopep8:
-	pipenv run autopep8 --in-place --recursive setup.py $(MODULE)
 
 yapf:
 	pipenv run yapf --recursive -i $(MODULE)
@@ -46,6 +43,9 @@ test-local:
 
 test-all:
 	pipenv run pytest tests tests_local
+
+test-coverage-all:
+	pipenv run py.test tests tests_local --cov $(MODULE) --cov-report term-missing --cov-report html
 
 requirements.txt:
 	

@@ -63,3 +63,4 @@ AUTHORS
 api.sql
 *.sublime-workspace
 *.sublime-project
+Pipfile.lock
