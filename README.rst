@@ -75,3 +75,16 @@ Cloner le dépot puis :
 
 api.py est maintenant dans pythonthesorimed
 
+Testing
+---------
+
+make test : toutes les fonctionnalitées ne nécessitant pas le base de donnée thesorimed
+make test-local : tests avec des appels à thesorimed
+make all : tout
+
+Travis utilise la version "make test"
+
+Coverage
+------------
+make test-coverage
+make test-coverage-all
