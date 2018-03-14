@@ -1,5 +1,6 @@
 # Standard Libraries
 from collections.abc import Iterable
+from typing import Iterable
 
 # Third Party Libraries
 import psycopg2
@@ -28,60 +29,44 @@ class ThesoItem:
         """
         # raise NotImplementedError
         return psycopg2.connect(
-            host=self.host,
-            dbname=self.dbname,
-            user=self.user,
-            password=self.password)
+            host=self.host, dbname=self.dbname, user=self.user, password=self.password)
 
-    def _appel_char(self, obj_api, req):
-        """
-        Pour les précédure 'char' retournant une valeur simple
-        """
-
-        req = list(req)  # list to modify tupple
-        if 'str' in obj_api.input_type[0]:  # turn arg to str if varchar
+    def _normalize_req(self, obj_api, req):
+        req = list(req)
+        if isinstance(req[0], str):
+            return req
+        if obj_api.genre == "char":
             req[0] = str(req[0])
+        elif obj_api.genre == "cursor":
+            req[0] = ','.join(map(str, req[0]))
+        else:
+            raise ThesorimedError('genre invalide')
+        return req
+
+    def _appel_proc(self, obj_api, req):
+
+        if 'str' in obj_api.input_type[0]:
+            requete = self._normalize_req(obj_api, req)
+        else:
+            requete = req
 
         with self._connect() as con:
             with con.cursor(cursor_factory=NamedTupleCursor) as curs:
                 curs.execute("SET search_path TO thesorimed, public")
-                curs.callproc("thesorimed." + obj_api.name, req)
+                curs.callproc("thesorimed." + obj_api.name, requete)
                 res = curs.fetchone()
+
                 try:
-                    return getattr(res, obj_api.name).split(', ')
+                    result = getattr(res, obj_api.name).split(', ')
                 except AttributeError:
                     return None
 
-    def _appel_refcursor(self, obj_api, req):
-        """
-        Pour les procédures "cursor" reournant un liste
-        """
-        # convert [int,int,int] to 'int,int, int'
-        req = list(req)
-        for i in range(len(req)):
-            if 'str' in obj_api.input_type[i]:
-                req[i] = ','.join(map(str, req[i]))
-        # create connection
-        with self._connect() as con:
-            with con.cursor(cursor_factory=NamedTupleCursor) as curs:
-                curs.execute("SET search_path TO thesorimed, public")
-                curs.callproc("thesorimed." + obj_api.name, req)
+                if result[0].startswith("<unnamed portal"):
+                    f = f'FETCH ALL IN "{result[0]}"'
+                    curs.execute(f)
+                    result = curs.fetchall()
 
-                portal_name = curs.fetchone()[0]  # get the cursor
-                portal_name = '"' + portal_name + '"'
-                f = "FETCH ALL IN {0};".format(
-                    portal_name)  # retrieve from cursor
-                curs.execute(f)
-                cc = curs.fetchall()
-        return cc
-
-    def _appel_proc(self, obj_api):
-        if obj_api.genre == "char":
-            return self._appel_char
-        elif obj_api.genre == "cursor":
-            return self._appel_refcursor
-        else:
-            raise ThesorimedError('Genre de la procédure inconnu')
+                return result
 
     @staticmethod
     def _valide_req(obj, req):
@@ -90,13 +75,13 @@ class ThesoItem:
 
         if obj.input_type == ['str', 'int']:
             if not isinstance(req[0], Iterable):
+                print(req)
                 raise ThesorimedError("Le premier argument doit être iterable")
             for item in req[0]:
                 try:
                     int(item)
                 except ValueError:
-                    raise ThesorimedError(
-                        "L'argument attendu est une liste d'entier")
+                    raise ThesorimedError("L'argument attendu est une liste d'entier")
 
         for x, y in zip(obj.input_type, req):
             if x.startswith('int'):
@@ -106,19 +91,18 @@ class ThesoItem:
             longueur_champs = re.findall(r"(?:int|str)([0-9]+)", x)
             if longueur_champs:
                 if y > pow(10, int(longueur_champs[0])):
-                    raise ThesorimedError(
-                        f"Longueur de requête limité à {longueur_champs}")
+                    raise ThesorimedError(f"Longueur de requête limité à {longueur_champs[0]}")
         return True
 
     def proc(self, name, *req):
         try:
             obj_api = thesoapi[name]
         except KeyError:
-            raise ThesorimedError("La procédure appelé n'existe pas")
+            raise ThesorimedError("La procédure appelée n'existe pas")
 
         self._valide_req(obj_api, req)
 
-        return self._appel_proc(obj_api)(obj_api, req)
+        return self._appel_proc(obj_api, req)
 
 
 """

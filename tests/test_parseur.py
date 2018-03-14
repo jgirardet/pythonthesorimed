@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 # pythonthesorimed
+from pythonthesorimed.exceptions import ThesorimedParseurError
 from pythonthesorimed.parseur.parseur import ThesorimedApiParseur
 from pythonthesorimed.parseur.prototype import import_and_nametupple_def, intro
 
@@ -100,7 +101,13 @@ class TestThesorimedAPiParseur:
         with pytest.raises(Exception):
             p.clean_retour()
 
-    def test_create_apicleaned(self, parseur_gabarit_extracted):
+    def test_nb_api_inccorect_raises(self, parseur_gabarit_extracted):
+        p = parseur_gabarit_extracted
+        p.nb_api = 1
+        with pytest.raises(ThesorimedParseurError):
+            p.create_procapi()
+
+    def test_create_thesoapi(self, parseur_gabarit_extracted):
         p = parseur_gabarit_extracted
         p.clean_func_name()
         p.clean_params()

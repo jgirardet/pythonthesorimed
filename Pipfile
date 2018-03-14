@@ -6,11 +6,9 @@ verify_ssl = true
 
 [dev-packages]
 
-"flake8" = "*"
-pycodestyle = "*"
+flake8 = "*"
 yapf = "*"
 isort = "*"
-"autopep8" = "*"
 cryptography = "*"
 pyyaml = "*"
 pytest = "*"

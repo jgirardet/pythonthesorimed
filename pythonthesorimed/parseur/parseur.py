@@ -52,7 +52,7 @@ class ThesorimedApiParseur:
         """
         if isinstance(self.fichier, io.StringIO):  # monkeypatch dont like open
             f = self.fichier
-        else:
+        else:  # pragma: no cover
             f = open(self.fichier)
 
         self.lignes_lues = []
@@ -60,6 +60,7 @@ class ThesorimedApiParseur:
             ligne = ligne.lower()
             if ligne.startswith(self.ligne_motif):
                 self.lignes_lues.append(ligne)
+        f.close()
 
     def extraction(self):
         """
@@ -109,8 +110,7 @@ class ThesorimedApiParseur:
             elif 'character' in f[2]:
                 f[2] = "char"
             else:
-                raise Exception(
-                    "le Retour d'entrée n'est pas connu pour {} ".format(f[0]))
+                raise Exception("le Retour d'entrée n'est pas connu pour {} ".format(f[0]))
 
     def create_procapi(self):
         # turn extracted to namedtupple for convinience
@@ -121,8 +121,7 @@ class ThesorimedApiParseur:
             self.thesoapi[i[0]] = (ProcApi(i[0], i[1], i[2]))
         if len(self.thesoapi) != self.nb_api:
             raise ThesorimedParseurError(
-                f'Le nombre Api attendu ({self.nb_api}) ne correspond pas : {len(self.thesoapi)}'
-            )
+                f'Le nombre Api attendu ({self.nb_api}) ne correspond pas : {len(self.thesoapi)}')
 
     def clean_all(self):
         # run all cleaning function
@@ -155,7 +154,7 @@ class ThesorimedApiParseur:
         self.write_api()
 
 
-def main():
+def main():  # pragma: no cover
     import sys
     a = ThesorimedApiParseur(fichier=sys.argv[1])
     a.create_thesorimed()
