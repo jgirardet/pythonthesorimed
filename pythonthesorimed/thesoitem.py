@@ -104,6 +104,21 @@ class ThesoItem:
 
         return self._appel_proc(obj_api, req)
 
+    def get_by_gsp(self, var):
+        with self._connect() as con:
+            with con.cursor(cursor_factory=NamedTupleCursor) as curs:
+                curs.execute("""
+                SELECT *
+                FROM thesorimed.GSP_GENERIQUE_SPECIALITE g
+                WHERE LOWER(g.gsp_nom) LIKE '{}%'
+                """.format(var))
+                # f = "FETCH ALL IN {0};".format(a) #retrieve from cursor
+                # curs.execute(f)
+                cc = curs.fetchall()
+        return cc
+
+
+
 
 """
 usage dans Django:
