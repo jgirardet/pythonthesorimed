@@ -9,6 +9,8 @@ from psycopg2.extras import NamedTupleCursor
 from .api import thesoapi
 from .exceptions import ThesorimedError
 
+from itertools import chain
+
 
 class ThesoItem:
     """
@@ -29,7 +31,10 @@ class ThesoItem:
         """
         # raise NotImplementedError
         return psycopg2.connect(
-            host=self.host, dbname=self.dbname, user=self.user, password=self.password)
+            host=self.host,
+            dbname=self.dbname,
+            user=self.user,
+            password=self.password)
 
     def _normalize_req(self, obj_api, req):
         req = list(req)
@@ -81,7 +86,8 @@ class ThesoItem:
                 try:
                     int(item)
                 except ValueError:
-                    raise ThesorimedError("L'argument attendu est une liste d'entier")
+                    raise ThesorimedError(
+                        "L'argument attendu est une liste d'entier")
 
         for x, y in zip(obj.input_type, req):
             if x.startswith('int'):
@@ -91,7 +97,8 @@ class ThesoItem:
             longueur_champs = re.findall(r"(?:int|str)([0-9]+)", x)
             if longueur_champs:
                 if y > pow(10, int(longueur_champs[0])):
-                    raise ThesorimedError(f"Longueur de requête limité à {longueur_champs[0]}")
+                    raise ThesorimedError(
+                        f"Longueur de requête limité à {longueur_champs[0]}")
         return True
 
     def proc(self, name, *req):
@@ -104,20 +111,49 @@ class ThesoItem:
 
         return self._appel_proc(obj_api, req)
 
-    def get_by_gsp(self, var):
+    def get_by(self, mode, var):
+        var = var.replace(' ', "%") + "%"
+
+        requete = {
+            'gsp':
+            """
+                SELECT gsp_nom, gsp_code_virtuel, gsp_code_sq_pk
+                FROM thesorimed.GSP_GENERIQUE_SPECIALITE g
+                WHERE LOWER(g.gsp_nom) LIKE %s
+                ORDER BY gsp_nom
+                """,
+            'spe':
+            """
+                SELECT sp_nom, sp_cipucd, sp_code_sq_pk, sp_gsp_code_fk
+                FROM thesorimed.sp_specialite g
+                WHERE LOWER(g.sp_nom) LIKE %s
+                ORDER BY sp_nom
+                """,
+        }
+
         with self._connect() as con:
             with con.cursor(cursor_factory=NamedTupleCursor) as curs:
-                curs.execute("""
-                SELECT *
-                FROM thesorimed.GSP_GENERIQUE_SPECIALITE g
-                WHERE LOWER(g.gsp_nom) LIKE '{}%'
-                """.format(var))
-                # f = "FETCH ALL IN {0};".format(a) #retrieve from cursor
-                # curs.execute(f)
+                curs.execute(requete[mode], (var, ))
                 cc = curs.fetchall()
+
         return cc
 
+    def fuzzy(
+            self,
+            chaine: str,
+    ):
+        """
+        Fuzzy search dans les gsp et spe. Les réultats gsp sont affichés en premier.
+        """
+        gsp = self.get_by('gsp', chaine)
+        spe = self.get_by('spe', chaine)
 
+        gsp_codes = (x.gsp_code_sq_pk for x in gsp)  # on extrait les gsp
+
+        new_spe = (x for x in spe if x.sp_gsp_code_fk not in gsp_codes)
+        # and x.sp_gsp_code_fk is not None
+
+        return list(chain(gsp, new_spe))
 
 
 """

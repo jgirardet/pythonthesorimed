@@ -3,15 +3,13 @@ from pythonthesorimed.thesoitem import ThesoItem
 a = ThesoItem('localhost', 'thesorimed', 'j', 'j')
 
 import time
+from itertools import chain
+from operator import attrgetter
 
-nom = ""
-for i in "paracetamol":
-    nom = nom + i
-    print(nom)
-    e = a.get_by_gsp(nom)
-    z = [x.gsp_nom for x in sorted(e)]
-    print([r for r in z])
-    time.sleep(1)
+
+def recherche_nom(nom):
+    print(a.fuzzy("paracetamol"))
+
 
 # from psycopg2.extras import NamedTupleCursor
 # from theso import connect, get_the_spe_details
@@ -60,8 +58,4 @@ for i in "paracetamol":
 
 # # chercheMed()
 
-# x=1
-
-# while x != '0':
-#     x = input('Entrez une chaine : \n')
-#     print(recherche_par_virtuel(x))
+recherche_nom('azi')

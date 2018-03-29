@@ -22,6 +22,7 @@ sphinx-autobuild = "*"
 pytest-pythonpath = "*"
 pytest-timeit = "*"
 ipython = "*"
+"e1839a8" = {path = ".", editable = true}
 
 
 [packages]
