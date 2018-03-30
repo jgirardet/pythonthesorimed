@@ -55,5 +55,11 @@ def test_proc_launch_validation():
         instance.proc('get_cip', 1, 2, 3)
 
 
-def test_appel_proc_check_string():
-    pass
+def test_get_by_gsp():
+    req = instance.get_by('gsp', "paracetamol")
+    assert hasattr(req[0], "gsp_nom")
+
+
+def test_get_by_spe():
+    req = instance.get_by('spe', "paracetamol")
+    assert hasattr(req[0], "sp_nom")

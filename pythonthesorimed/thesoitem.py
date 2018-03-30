@@ -1,5 +1,6 @@
 # Standard Libraries
 from collections.abc import Iterable
+from itertools import chain
 from typing import Iterable
 
 # Third Party Libraries
@@ -8,8 +9,6 @@ from psycopg2.extras import NamedTupleCursor
 
 from .api import thesoapi
 from .exceptions import ThesorimedError
-
-from itertools import chain
 
 
 class ThesoItem:
@@ -31,12 +30,12 @@ class ThesoItem:
         """
         # raise NotImplementedError
         return psycopg2.connect(
-            host=self.host,
-            dbname=self.dbname,
-            user=self.user,
-            password=self.password)
+            host=self.host, dbname=self.dbname, user=self.user, password=self.password)
 
     def _normalize_req(self, obj_api, req):
+        """
+        globalement transforme les listes en str
+        """
         req = list(req)
         if isinstance(req[0], str):
             return req
@@ -86,8 +85,7 @@ class ThesoItem:
                 try:
                     int(item)
                 except ValueError:
-                    raise ThesorimedError(
-                        "L'argument attendu est une liste d'entier")
+                    raise ThesorimedError("L'argument attendu est une liste d'entier")
 
         for x, y in zip(obj.input_type, req):
             if x.startswith('int'):
@@ -97,11 +95,13 @@ class ThesoItem:
             longueur_champs = re.findall(r"(?:int|str)([0-9]+)", x)
             if longueur_champs:
                 if y > pow(10, int(longueur_champs[0])):
-                    raise ThesorimedError(
-                        f"Longueur de requête limité à {longueur_champs[0]}")
+                    raise ThesorimedError(f"Longueur de requête limité à {longueur_champs[0]}")
         return True
 
     def proc(self, name, *req):
+        """
+        Method de base pour l'appel des procédures
+        """
         try:
             obj_api = thesoapi[name]
         except KeyError:
@@ -112,18 +112,22 @@ class ThesoItem:
         return self._appel_proc(obj_api, req)
 
     def get_by(self, mode, var):
+        """
+        Recherche mutli critere sur les noms virtuels et de specialité
+        """
+
         var = var.replace(' ', "%") + "%"
 
         requete = {
             'gsp':
-            """
+                """
                 SELECT gsp_nom, gsp_code_virtuel, gsp_code_sq_pk
                 FROM thesorimed.GSP_GENERIQUE_SPECIALITE g
                 WHERE LOWER(g.gsp_nom) LIKE %s
                 ORDER BY gsp_nom
                 """,
             'spe':
-            """
+                """
                 SELECT sp_nom, sp_cipucd, sp_code_sq_pk, sp_gsp_code_fk
                 FROM thesorimed.sp_specialite g
                 WHERE LOWER(g.sp_nom) LIKE %s
@@ -145,32 +149,27 @@ class ThesoItem:
         """
         Fuzzy search dans les gsp et spe. Les réultats gsp sont affichés en premier.
         """
+
+        # on recupere par spe et par groupe
         gsp = self.get_by('gsp', chaine)
         spe = self.get_by('spe', chaine)
 
-        gsp_codes = (x.gsp_code_sq_pk for x in gsp)  # on extrait les gsp
+        # on retire les spes dont le groupe est déjà dans gsp (ex : PARACETAMOL mylan)
+        gsp_codes = [x.gsp_code_sq_pk for x in gsp]  # on extrait les gsp
+        new_spe = [x for x in spe if x.sp_gsp_code_fk not in gsp_codes]
 
-        new_spe = (x for x in spe if x.sp_gsp_code_fk not in gsp_codes)
-        # and x.sp_gsp_code_fk is not None
+        # ensuite pour chaque spe ayant le même gspn on garde que la première
+        # les None sont gardés car incertain
+        spe_restant = []
+        gsp_codes_restant = []
+        for x in new_spe:
+            if x.sp_gsp_code_fk is None:
+                spe_restant.append(x)
+                continue
+            elif x.sp_gsp_code_fk in gsp_codes_restant:
+                continue
+            gsp_codes_restant.append(x.sp_gsp_code_fk)
+            spe_restant.append(x)
 
-        return list(chain(gsp, new_spe))
-
-
-"""
-usage dans Django:
-
-from theso import ThesoItem
-
-class Medicament:
-    name
-    cip
-
-    detail(self, name, req):
-        a = ThesoItem(self.cip)
-        return a.proc(name, req)
-
-    def monographie:
-        retruen a.ThesoItem(self.cip).monographe
-
-
-"""
+        # retourne gsp et spe épurés
+        return list(chain(gsp, spe_restant))
