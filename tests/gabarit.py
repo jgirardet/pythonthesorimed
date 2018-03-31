@@ -1,5 +1,5 @@
 # Standard Libraries
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from unittest.mock import MagicMock
 
 # pythonthesorimed
@@ -105,30 +105,18 @@ spe = [
 ]
 
 fuzzy_result = [
-    Record(
-        gsp_nom='Paracetamol 1000 mg comprime',
-        gsp_code_virtuel='0001052',
-        gsp_code_sq_pk=1052),
-    Record(
-        gsp_nom='Paracetamol 1000 mg gelule',
-        gsp_code_virtuel='0007067',
-        gsp_code_sq_pk=7067),
-    Record(
-        gsp_nom='Paracetamol 1000 mg granule voie orale',
-        gsp_code_virtuel='0006410',
-        gsp_code_sq_pk=6410),
-    Record(
-        gsp_nom='Paracetamol 1000 mg suppositoire',
-        gsp_code_virtuel='0002313',
-        gsp_code_sq_pk=2313),
-    Record2(
-        sp_nom='PARACETAMOL BBM 1000 MG INJ',
-        sp_cipucd='9387549',
-        sp_code_sq_pk=32226,
-        sp_gsp_code_fk=2573),
-    Record2(
-        sp_nom='PARACETAMOL KBI 1000 MG POCHE',
-        sp_cipucd='9392467',
-        sp_code_sq_pk=34612,
-        sp_gsp_code_fk=None),
+    OrderedDict([('gsp_nom', 'Paracetamol 1000 mg comprime'),
+                 ('gsp_code_virtuel', '0001052'), ('gsp_code_sq_pk', 1052)]),
+    OrderedDict([('gsp_nom', 'Paracetamol 1000 mg gelule'),
+                 ('gsp_code_virtuel', '0007067'), ('gsp_code_sq_pk', 7067)]),
+    OrderedDict([('gsp_nom', 'Paracetamol 1000 mg granule voie orale'),
+                 ('gsp_code_virtuel', '0006410'), ('gsp_code_sq_pk', 6410)]),
+    OrderedDict([('gsp_nom', 'Paracetamol 1000 mg suppositoire'),
+                 ('gsp_code_virtuel', '0002313'), ('gsp_code_sq_pk', 2313)]),
+    OrderedDict([('sp_nom', 'PARACETAMOL BBM 1000 MG INJ'),
+                 ('sp_cipucd', '9387549'), ('sp_code_sq_pk',
+                                            32226), ('sp_gsp_code_fk', 2573)]),
+    OrderedDict([('sp_nom', 'PARACETAMOL KBI 1000 MG POCHE'),
+                 ('sp_cipucd', '9392467'), ('sp_code_sq_pk',
+                                            34612), ('sp_gsp_code_fk', None)])
 ]
