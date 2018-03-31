@@ -88,6 +88,10 @@ Par exemple : "codéine paracétamol"  ne retournera pas "paracétamol + codéin
 
 La recherche doit s'effectuer en minuscule.
 
+.. code-block:: python
+
+    session.fuzzy('chaine')
+
 
 
 Parseur
