@@ -128,7 +128,7 @@ class ThesoItem:
                 """,
             'spe':
                 """
-                SELECT sp_nom, sp_cipucd, sp_code_sq_pk, sp_gsp_code_fk
+                SELECT sp_nom, sp_cipucd_long, sp_code_sq_pk, sp_gsp_code_fk
                 FROM thesorimed.sp_specialite g
                 WHERE LOWER(g.sp_nom) LIKE %s
                 ORDER BY sp_nom

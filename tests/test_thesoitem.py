@@ -11,7 +11,6 @@ from .gabarit import fuzzy_result, gsp, spe
 instance = ThesoItem("1", "3", "4", "5")
 
 
-
 class TestValidReq:
     def test_has_not_equals_args_number_raises(self):
         with pytest.raises(ThesorimedError) as e:
@@ -53,6 +52,7 @@ class TestValidReq:
     def test_longueur_req_trop_grande_raises(self):
         with pytest.raises(ThesorimedError) as e:
             assert ThesoItem._valide_req(thesoapi['get_cip'], [1234567])
+
         assert str(e.value) == "Longueur de requête limité à 6"
 
     def test_longueur_ok_pass(self):
@@ -96,5 +96,7 @@ def test_fuzzy(monkeypatch):
 
     fuzz_mock = [x[:] for x in fuzzy_result]
     fuzz_instance = [x[:] for x in instance.fuzzy("paracetamol 1000")]
+
+    print(fuzz_mock)
 
     assert fuzz_instance == fuzz_mock
