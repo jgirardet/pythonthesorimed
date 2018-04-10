@@ -1,5 +1,5 @@
 # Standard Libraries
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict, namedtuple
 from unittest.mock import MagicMock
 
 # pythonthesorimed

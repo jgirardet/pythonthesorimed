@@ -1,4 +1,5 @@
 # Standard Libraries
+import json
 from collections import defaultdict
 from collections.abc import Iterable
 from itertools import chain
@@ -10,7 +11,6 @@ from psycopg2.extras import RealDictConnection
 
 from .api import thesoapi
 from .exceptions import ThesorimedError
-import json
 
 
 class ThesoItem:
@@ -93,8 +93,7 @@ class ThesoItem:
                 try:
                     int(item)
                 except ValueError:
-                    raise ThesorimedError(
-                        "L'argument attendu est une liste d'entier")
+                    raise ThesorimedError("L'argument attendu est une liste d'entier")
 
         for x, y in zip(obj.input_type, req):
             if x.startswith('int'):
@@ -104,8 +103,7 @@ class ThesoItem:
             longueur_champs = re.findall(r"(?:int|str)([0-9]+)", x)
             if longueur_champs:
                 if y > pow(10, int(longueur_champs[0])):
-                    raise ThesorimedError(
-                        f"Longueur de requête limité à {longueur_champs[0]}")
+                    raise ThesorimedError(f"Longueur de requête limité à {longueur_champs[0]}")
         return True
 
     def proc(self, name, *req):
@@ -130,14 +128,14 @@ class ThesoItem:
 
         requete = {
             'gsp':
-            """
+                """
                 SELECT gsp_nom, gsp_code_virtuel, gsp_code_sq_pk
                 FROM thesorimed.GSP_GENERIQUE_SPECIALITE g
                 WHERE LOWER(g.gsp_nom) LIKE %s
                 ORDER BY gsp_nom
                 """,
             'spe':
-            """
+                """
                 SELECT DISTINCT sp_nom, pre_code_pk, sp_code_sq_pk, sp_gsp_code_fk, pre_etat_commer
                 FROM thesorimed.sp_specialite s, thesorimed.pre_presentation p
                 WHERE s.sp_code_sq_pk = p.pre_sp_code_fk
@@ -175,8 +173,7 @@ class ThesoItem:
         # on ajoute sp_cipucd_long pour l'avoir pour plus tard
         codes_generiques = [x['sp_code_sq_pk'] for x in groupe_generiques]
         etat_commer = {
-            i['sp_code_sq_pk']: (i['etat_commercialisation'],
-                                 i['sp_cipucd_long'])
+            i['sp_code_sq_pk']: (i['etat_commercialisation'], i['sp_cipucd_long'])
             for i in self.proc('get_the_etat_commer_spe', codes_generiques, 1)
         }
 
@@ -186,10 +183,8 @@ class ThesoItem:
         for code_gsp, spes in dico_generiques_par_gsp.items():
             for spe in spes:
                 if etat_commer[spe['sp_code_sq_pk']][0] == 'D':
-                    nouveau_gsp[code_gsp]['sp_code_sq_pk'] = spe[
-                        'sp_code_sq_pk']
-                    nouveau_gsp[code_gsp]['pre_code_pk'] = etat_commer[spe[
-                        'sp_code_sq_pk']][1]
+                    nouveau_gsp[code_gsp]['sp_code_sq_pk'] = spe['sp_code_sq_pk']
+                    nouveau_gsp[code_gsp]['pre_code_pk'] = etat_commer[spe['sp_code_sq_pk']][1]
                     nouveau_gsp[code_gsp].update(dico_gsp[code_gsp])
                     # final.append(item)
                     break
@@ -216,11 +211,8 @@ class ThesoItem:
 
         if gsp:
             # on retire les spes dont le groupe est déjà dans gsp (ex : PARACETAMOL mylan)
-            gsp_codes = [x['gsp_code_sq_pk']
-                         for x in gsp]  # on extrait les gsp
-            gsp_new_spe = [
-                x for x in spe if x['sp_gsp_code_fk'] not in gsp_codes
-            ]
+            gsp_codes = [x['gsp_code_sq_pk'] for x in gsp]  # on extrait les gsp
+            gsp_new_spe = [x for x in spe if x['sp_gsp_code_fk'] not in gsp_codes]
 
         else:
             gsp_new_spe = spe
