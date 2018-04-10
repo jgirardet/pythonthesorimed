@@ -5,6 +5,8 @@ import pytest
 from pythonthesorimed.exceptions import ThesorimedError
 from pythonthesorimed.thesoitem import ThesoItem
 
+from tests.gabarit import fuzzy_result, gsp, spe
+
 base_get_cip = {
     1: ['3400933354978'],
     2: None,
@@ -63,3 +65,26 @@ def test_get_by_gsp():
 def test_get_by_spe():
     req = instance.get_by('spe', "paracetamol")
     assert hasattr(req[0], "sp_nom")
+
+
+def test_fuzzy(monkeypatch):
+    def f_proc(self, mode, var):
+        if mode == "gsp":
+            return list(gsp)
+        elif mode == "spe":
+            return list(spe)
+
+    monkeypatch.setattr(ThesoItem, 'get_by', f_proc)
+
+    fuzz_mock = [x[:] for x in fuzzy_result]
+    fuzz_instance = [x[:] for x in instance.fuzzy("paracetamol 10")]
+
+    assert fuzz_instance == fuzz_mock
+
+
+def test_fuzzy_fail_gsp_new_empty():
+
+    a = instance.fuzzy("paracetamol 100")
+    assert a
+    a = instance.fuzzy("paracetamol 10")  #  fail if bug
+    assert a

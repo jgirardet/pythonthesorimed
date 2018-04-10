@@ -6,10 +6,7 @@ from pythonthesorimed.api import ProcApi, thesoapi
 from pythonthesorimed.exceptions import ThesorimedError
 from pythonthesorimed.thesoitem import ThesoItem
 
-from .gabarit import fuzzy_result, gsp, spe
-
 instance = ThesoItem("1", "3", "4", "5")
-
 
 
 class TestValidReq:
@@ -83,18 +80,3 @@ def test_proc_raises():
     with pytest.raises(ThesorimedError) as e:
         instance.proc("blabalbal", [1])
     assert str(e.value) == "La procédure appelée n'existe pas"
-
-
-def test_fuzzy(monkeypatch):
-    def f_proc(self, mode, var):
-        if mode == "gsp":
-            return list(gsp)
-        elif mode == "spe":
-            return list(spe)
-
-    monkeypatch.setattr(ThesoItem, 'get_by', f_proc)
-
-    fuzz_mock = [x[:] for x in fuzzy_result]
-    fuzz_instance = [x[:] for x in instance.fuzzy("paracetamol 1000")]
-
-    assert fuzz_instance == fuzz_mock

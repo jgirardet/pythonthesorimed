@@ -5,7 +5,7 @@ from typing import Iterable
 
 # Third Party Libraries
 import psycopg2
-from psycopg2.extras import NamedTupleCursor
+from psycopg2.extras import DictCursor
 
 from .api import thesoapi
 from .exceptions import ThesorimedError
@@ -55,20 +55,21 @@ class ThesoItem:
             requete = req
 
         with self._connect() as con:
-            with con.cursor(cursor_factory=NamedTupleCursor) as curs:
+            with con.cursor(cursor_factory=DictCursor) as curs:
                 curs.execute("SET search_path TO thesorimed, public")
                 curs.callproc("thesorimed." + obj_api.name, requete)
                 res = curs.fetchone()
+                print(res[obj_api.name])
 
                 try:
-                    result = getattr(res, obj_api.name).split(', ')
+                    result = res[obj_api.name]
                 except AttributeError:
                     return None
-
-                if result[0].startswith("<unnamed portal"):
-                    f = f'FETCH ALL IN "{result[0]}"'
-                    curs.execute(f)
-                    result = curs.fetchall()
+                print(result)
+                # if result.startswith("<unnamed portal"):
+                f = f'FETCH ALL IN "{result}"'
+                curs.execute(f)
+                result = curs.fetchall()
 
                 return result
 
@@ -136,11 +137,53 @@ class ThesoItem:
         }
 
         with self._connect() as con:
-            with con.cursor(cursor_factory=NamedTupleCursor) as curs:
+            with con.cursor(cursor_factory=DictCursor) as curs:
                 curs.execute(requete[mode], (var, ))
                 cc = curs.fetchall()
 
         return cc
+
+
+
+
+
+    def gsp_to_valid_spe(self, gsp):
+        """
+        prend un gsp issu de get_by, trouve une spé commercialisée correspondante
+        retourne un dict
+        """
+        gsp_code= [x.gsp_code_sq_pk for x in gsp]
+
+        groupe_generiques = self.proc('get_the_virtuel', gsp_code, 2)
+
+
+        from collections import defaultdict
+
+        dico_generiques_par_gsp = defaultdict(list)  # {codegsp: [{code_spe:spe}, ....]}
+
+        [dico_generiques_par_gsp[x.code_gsp].append(x) for x in groupe_generiques]
+
+        codes_generiques = [x.sp_code_sq_pk for x in groupe_generiques]
+
+
+
+        etat_commer = {i.sp_code_sq_pk : i.etat_commercialisation for i in self.proc('get_the_etat_commer_spe', codes_generiques, 1)}
+
+
+        final = []
+
+        for un_gsp, spes in dico_generiques_par_gsp.items():
+            for spe in spes:
+                if etat_commer[spe.sp_code_sq_pk] == 'D':
+                    item = dict()
+                    item['sp_code_sq_pk'] = spe.sp_code_sq_pk
+                    final.append(item)
+                    break
+
+        return final
+
+
+
 
     def fuzzy(
             self,
@@ -156,7 +199,16 @@ class ThesoItem:
 
         # on retire les spes dont le groupe est déjà dans gsp (ex : PARACETAMOL mylan)
         gsp_codes = [x.gsp_code_sq_pk for x in gsp]  # on extrait les gsp
-        new_spe = [x for x in spe if x.sp_gsp_code_fk not in gsp_codes]
+        gsp_new_spe = [x for x in spe if x.sp_gsp_code_fk not in gsp_codes]
+
+        # on retire les spes qui ne sont plus commercialisées
+        if gsp_new_spe: 
+            commer_statut = self.proc('get_the_etat_commer_spe', [i.sp_code_sq_pk for i in gsp_new_spe], 1)  # on recupère les infos pour chaque spe
+            commer_statut_by_id  = {i.sp_code_sq_pk : i.etat_commercialisation for i in commer_statut}  # on class statut par id
+            new_spe = [i for i in gsp_new_spe if commer_statut_by_id[i.sp_code_sq_pk] == 'D']
+        else:
+            new_spe= gsp_new_spe
+
 
         # ensuite pour chaque spe ayant le même gspn on garde que la première
         # les None sont gardés car incertain
@@ -172,4 +224,11 @@ class ThesoItem:
             spe_restant.append(x)
 
         # retourne gsp et spe épurés
-        return list(chain(gsp, spe_restant))
+
+
+        # on recherche un code de spe valable pour ajouter au gsp
+        # gsp_en_dico = gsp
+        gsp_en_dico = self.gsp_to_valid_spe(gsp)
+
+
+        return list(chain(gsp_en_dico, spe_restant))
