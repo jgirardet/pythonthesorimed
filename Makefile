@@ -100,6 +100,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
+	rm -rf .pytest_cache/
 
 api:
 	pipenv run python build.py api.sql pythonthesorimed

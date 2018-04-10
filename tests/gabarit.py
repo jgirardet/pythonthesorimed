@@ -47,76 +47,117 @@ Record2 = namedtuple("Record2",
                      "sp_nom sp_cipucd sp_code_sq_pk sp_gsp_code_fk")
 
 # requete "paracetamol 1000"
-gsp = [
-    Record(
-        gsp_nom='Paracetamol 1000 mg comprime',
-        gsp_code_virtuel='0001052',
-        gsp_code_sq_pk=1052),
-    Record(
-        gsp_nom='Paracetamol 1000 mg gelule',
-        gsp_code_virtuel='0007067',
-        gsp_code_sq_pk=7067),
-    Record(
-        gsp_nom='Paracetamol 1000 mg granule voie orale',
-        gsp_code_virtuel='0006410',
-        gsp_code_sq_pk=6410),
-    Record(
-        gsp_nom='Paracetamol 1000 mg suppositoire',
-        gsp_code_virtuel='0002313',
-        gsp_code_sq_pk=2313)
-]
+gsp = [{
+    'gsp_nom': 'Paracetamol 1000 mg comprime',
+    'gsp_code_virtuel': '0001052',
+    'gsp_code_sq_pk': 1052
+}, {
+    'gsp_nom': 'Paracetamol 1000 mg gelule',
+    'gsp_code_virtuel': '0007067',
+    'gsp_code_sq_pk': 7067
+}, {
+    'gsp_nom': 'Paracetamol 1000 mg granule voie orale',
+    'gsp_code_virtuel': '0006410',
+    'gsp_code_sq_pk': 6410
+}, {
+    'gsp_nom': 'Paracetamol 1000 mg suppositoire',
+    'gsp_code_virtuel': '0002313',
+    'gsp_code_sq_pk': 2313
+}]
 
-spe = [
-    Record2(
-        sp_nom='PARACETAMOL BBM 1000 MG INJ',
-        sp_cipucd='9387549',
-        sp_code_sq_pk=32226,
-        sp_gsp_code_fk=2573),
-    Record2(
-        sp_nom='PARACETAMOL KBI 1000 MG INJ',
-        sp_cipucd='9379857',
-        sp_code_sq_pk=32376,
-        sp_gsp_code_fk=2573),
-    Record2(
-        sp_nom='PARACETAMOL KBI 1000 MG POCHE',
-        sp_cipucd='9392467',
-        sp_code_sq_pk=34612,
-        sp_gsp_code_fk=None),
-    Record2(
-        sp_nom='PARACETAMOL MYP 1000MG CPR EFF',
-        sp_cipucd='9424894',
-        sp_code_sq_pk=40615,
-        sp_gsp_code_fk=1052),
-    Record2(
-        sp_nom='PARACETAMOL PAN 1000 MG INJ',
-        sp_cipucd='9308685',
-        sp_code_sq_pk=22605,
-        sp_gsp_code_fk=2573),
-    Record2(
-        sp_nom='PARACETAMOL TVS 1000MG CPR EFF',
-        sp_cipucd='9396778',
-        sp_code_sq_pk=37062,
-        sp_gsp_code_fk=1052),
-    Record2(
-        sp_nom='PARACETAMOL ZEN 1000MG CPR EFF',
-        sp_cipucd='9384108',
-        sp_code_sq_pk=34388,
-        sp_gsp_code_fk=1052)
-]
+spe = [{
+    'sp_nom': 'PARACETAMOL BBM 1000 MG INJ',
+    'pre_code_pk': '3400958308123',
+    'sp_code_sq_pk': 32226,
+    'sp_gsp_code_fk': 2573,
+    'pre_etat_commer': 'D'
+}, {
+    'sp_nom': 'PARACETAMOL KBI 1000 MG INJ',
+    'pre_code_pk': '3400958007804',
+    'sp_code_sq_pk': 32376,
+    'sp_gsp_code_fk': 2573,
+    'pre_etat_commer': 'D'
+}, {
+    'sp_nom': 'PARACETAMOL KBI 1000 MG POCHE',
+    'pre_code_pk': '3400958249297',
+    'sp_code_sq_pk': 34612,
+    'sp_gsp_code_fk': 2573,
+    'pre_etat_commer': 'D'
+}, {
+    'sp_nom': 'PARACETAMOL PAN 1000 MG INJ',
+    'pre_code_pk': '3400957186241',
+    'sp_code_sq_pk': 22605,
+    'sp_gsp_code_fk': 2573,
+    'pre_etat_commer': 'D'
+}, {
+    'sp_nom': 'PARACETAMOL PAN 1000 MG INJ',
+    'pre_code_pk': '3400957299705',
+    'sp_code_sq_pk': 22605,
+    'sp_gsp_code_fk': 2573,
+    'pre_etat_commer': 'D'
+}, {
+    'sp_nom': 'PARACETAMOL TVS 1000MG CPR EFF',
+    'pre_code_pk': '3400926885328',
+    'sp_code_sq_pk': 37062,
+    'sp_gsp_code_fk': 1052,
+    'pre_etat_commer': 'D'
+}, {
+    'sp_nom': 'PARACETAMOL ZEN 1000MG CPR EFF',
+    'pre_code_pk': '3400956318346',
+    'sp_code_sq_pk': 34388,
+    'sp_gsp_code_fk': 1052,
+    'pre_etat_commer': 'D'
+}]
 
-fuzzy_result = [
-    OrderedDict([('gsp_nom', 'Paracetamol 1000 mg comprime'),
-                 ('gsp_code_virtuel', '0001052'), ('gsp_code_sq_pk', 1052)]),
-    OrderedDict([('gsp_nom', 'Paracetamol 1000 mg gelule'),
-                 ('gsp_code_virtuel', '0007067'), ('gsp_code_sq_pk', 7067)]),
-    OrderedDict([('gsp_nom', 'Paracetamol 1000 mg granule voie orale'),
-                 ('gsp_code_virtuel', '0006410'), ('gsp_code_sq_pk', 6410)]),
-    OrderedDict([('gsp_nom', 'Paracetamol 1000 mg suppositoire'),
-                 ('gsp_code_virtuel', '0002313'), ('gsp_code_sq_pk', 2313)]),
-    OrderedDict([('sp_nom', 'PARACETAMOL BBM 1000 MG INJ'),
-                 ('sp_cipucd', '9387549'), ('sp_code_sq_pk',
-                                            32226), ('sp_gsp_code_fk', 2573)]),
-    OrderedDict([('sp_nom', 'PARACETAMOL KBI 1000 MG POCHE'),
-                 ('sp_cipucd', '9392467'), ('sp_code_sq_pk',
-                                            34612), ('sp_gsp_code_fk', None)])
-]
+fuzzy_result = [{
+    'cip': '3400892621388',
+    'code': 17082,
+    'gsp_code': 1052,
+    'nom': 'Paracetamol 1000 mg comprime'
+}, {
+    'cip': '3400891297706',
+    'code': 1181,
+    'gsp_code': 2313,
+    'nom': 'Paracetamol 1000 mg suppositoire'
+}, {
+    'cip': '3400894091271',
+    'code': 37637,
+    'gsp_code': 6410,
+    'nom': 'Paracetamol 1000 mg granule voie orale'
+}, {
+    'cip': '3400893739846',
+    'code': 30798,
+    'gsp_code': 7067,
+    'nom': 'Paracetamol 1000 mg gelule'
+}, {
+    'cip': '3400958308123',
+    'code': 32226,
+    'gsp_code': 2573,
+    'nom': 'PARACETAMOL BBM 1000 MG INJ'
+}]
+
+dict_add_valid_spe = [{
+    'sp_code_sq_pk': 17082,
+    'pre_code_pk': '3400892621388',
+    'gsp_nom': 'Paracetamol 1000 mg comprime',
+    'gsp_code_virtuel': '0001052',
+    'gsp_code_sq_pk': 1052
+}, {
+    'sp_code_sq_pk': 1181,
+    'pre_code_pk': '3400891297706',
+    'gsp_nom': 'Paracetamol 1000 mg suppositoire',
+    'gsp_code_virtuel': '0002313',
+    'gsp_code_sq_pk': 2313
+}, {
+    'sp_code_sq_pk': 37637,
+    'pre_code_pk': '3400894091271',
+    'gsp_nom': 'Paracetamol 1000 mg granule voie orale',
+    'gsp_code_virtuel': '0006410',
+    'gsp_code_sq_pk': 6410
+}, {
+    'sp_code_sq_pk': 30798,
+    'pre_code_pk': '3400893739846',
+    'gsp_nom': 'Paracetamol 1000 mg gelule',
+    'gsp_code_virtuel': '0007067',
+    'gsp_code_sq_pk': 7067
+}]
