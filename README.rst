@@ -81,7 +81,7 @@ L'idée est d'épurer un maximum les résutlats afin d'éviter tous les doublons
     + Pour les spécialités restantes ayant un gsp commun, une seul est conservée
     + Les spécialités sans gsp sont conservées par défault pour ne pas risquer d'avoir un manque.
 
-  - Le tout est retournée en une seule liste, d'abord les gsp puis les spécialités restantes.
+  - Le tout est retournée en une seule liste, d'abord les gsp puis les spécialités restantes. Le contenu de la liste est des dict au format : nom, cip, code, gsp_code.
   
 Les différents éléments de la requète sont séparés par un espace et doivent être l'ordre de l'appelation officiele.
 Par exemple : "codéine paracétamol"  ne retournera pas "paracétamol + codéine".
