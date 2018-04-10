@@ -5,7 +5,7 @@ from typing import Iterable
 
 # Third Party Libraries
 import psycopg2
-from psycopg2.extras import DictCursor
+from psycopg2.extras import DictCursor, NamedTupleCursor, DictConnection, RealDictConnection
 
 from .api import thesoapi
 from .exceptions import ThesorimedError
@@ -30,7 +30,7 @@ class ThesoItem:
         """
         # raise NotImplementedError
         return psycopg2.connect(
-            host=self.host, dbname=self.dbname, user=self.user, password=self.password)
+            host=self.host, dbname=self.dbname, user=self.user, password=self.password, connection_factory= RealDictConnection)
 
     def _normalize_req(self, obj_api, req):
         """
@@ -55,23 +55,47 @@ class ThesoItem:
             requete = req
 
         with self._connect() as con:
-            with con.cursor(cursor_factory=DictCursor) as curs:
+            with con.cursor(cursor_factory=NamedTupleCursor) as curs:
                 curs.execute("SET search_path TO thesorimed, public")
                 curs.callproc("thesorimed." + obj_api.name, requete)
                 res = curs.fetchone()
-                print(res[obj_api.name])
 
                 try:
-                    result = res[obj_api.name]
+                    result = getattr(res, obj_api.name).split(', ')
                 except AttributeError:
                     return None
-                print(result)
-                # if result.startswith("<unnamed portal"):
-                f = f'FETCH ALL IN "{result}"'
-                curs.execute(f)
-                result = curs.fetchall()
+
+                if result[0].startswith("<unnamed portal"):
+                    f = f'FETCH ALL IN "{result[0]}"'
+                    curs.execute(f)
+                    result = curs.fetchall()
 
                 return result
+
+    def _appel_proc2(self, obj_api, req):
+
+        if 'str' in obj_api.input_type[0]:
+            requete = self._normalize_req(obj_api, req)
+        else:
+            requete = req
+
+        with self._connect() as con:
+            with con.cursor() as curs:
+                curs.execute("SET search_path TO thesorimed, public")
+                curs.callproc("thesorimed." + obj_api.name, requete)
+                resu = curs.fetchone()
+
+                res = resu[obj_api.name]
+
+                if not res:
+                    return
+
+                if res.startswith("<unnamed portal"):
+                    f = f'FETCH ALL IN "{res}"'
+                    curs.execute(f)
+                    res = curs.fetchall()
+
+                return res
 
     @staticmethod
     def _valide_req(obj, req):
@@ -111,6 +135,19 @@ class ThesoItem:
         self._valide_req(obj_api, req)
 
         return self._appel_proc(obj_api, req)
+
+    def proc2(self, name, *req):
+        """
+        Method de base pour l'appel des procédures
+        """
+        try:
+            obj_api = thesoapi[name]
+        except KeyError:
+            raise ThesorimedError("La procédure appelée n'existe pas")
+
+        self._valide_req(obj_api, req)
+
+        return self._appel_proc2(obj_api, req)
 
     def get_by(self, mode, var):
         """
