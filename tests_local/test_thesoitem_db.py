@@ -1,11 +1,10 @@
 # Third Party Libraries
 import pytest
+from tests.gabarit import dict_add_valid_spe, fuzzy_result, gsp, spe
 
 # pythonthesorimed
 from pythonthesorimed.exceptions import ThesorimedError
 from pythonthesorimed.thesoitem import ThesoItem
-
-from tests.gabarit import fuzzy_result, gsp, spe, dict_add_valid_spe
 
 base_get_cip = {
     1: ['3400933354978'],
