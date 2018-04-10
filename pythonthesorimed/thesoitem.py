@@ -9,6 +9,7 @@ from psycopg2.extras import NamedTupleCursor
 
 from .api import thesoapi
 from .exceptions import ThesorimedError
+import json
 
 
 class ThesoItem:
@@ -30,7 +31,10 @@ class ThesoItem:
         """
         # raise NotImplementedError
         return psycopg2.connect(
-            host=self.host, dbname=self.dbname, user=self.user, password=self.password)
+            host=self.host,
+            dbname=self.dbname,
+            user=self.user,
+            password=self.password)
 
     def _normalize_req(self, obj_api, req):
         """
@@ -85,7 +89,8 @@ class ThesoItem:
                 try:
                     int(item)
                 except ValueError:
-                    raise ThesorimedError("L'argument attendu est une liste d'entier")
+                    raise ThesorimedError(
+                        "L'argument attendu est une liste d'entier")
 
         for x, y in zip(obj.input_type, req):
             if x.startswith('int'):
@@ -95,7 +100,8 @@ class ThesoItem:
             longueur_champs = re.findall(r"(?:int|str)([0-9]+)", x)
             if longueur_champs:
                 if y > pow(10, int(longueur_champs[0])):
-                    raise ThesorimedError(f"Longueur de requête limité à {longueur_champs[0]}")
+                    raise ThesorimedError(
+                        f"Longueur de requête limité à {longueur_champs[0]}")
         return True
 
     def proc(self, name, *req):
@@ -120,7 +126,7 @@ class ThesoItem:
 
         requete = {
             'gsp':
-                """
+            """
                 SELECT gsp_nom, gsp_code_virtuel, gsp_code_sq_pk
                 FROM thesorimed.GSP_GENERIQUE_SPECIALITE g
                 WHERE LOWER(g.gsp_nom) LIKE %s
@@ -172,4 +178,4 @@ class ThesoItem:
             spe_restant.append(x)
 
         # retourne gsp et spe épurés
-        return list(chain(gsp, spe_restant))
+        return [record._asdict() for record in chain(gsp, spe_restant)]
