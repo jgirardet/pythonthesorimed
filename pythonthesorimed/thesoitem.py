@@ -5,7 +5,7 @@ from typing import Iterable
 
 # Third Party Libraries
 import psycopg2
-from psycopg2.extras import DictCursor
+from psycopg2.extras import DictCursor, NamedTupleCursor, DictConnection, RealDictConnection
 
 from .api import thesoapi
 from .exceptions import ThesorimedError
@@ -30,7 +30,11 @@ class ThesoItem:
         """
         # raise NotImplementedError
         return psycopg2.connect(
-            host=self.host, dbname=self.dbname, user=self.user, password=self.password)
+            host=self.host,
+            dbname=self.dbname,
+            user=self.user,
+            password=self.password,
+            connection_factory=RealDictConnection)
 
     def _normalize_req(self, obj_api, req):
         """
@@ -55,23 +59,47 @@ class ThesoItem:
             requete = req
 
         with self._connect() as con:
-            with con.cursor(cursor_factory=DictCursor) as curs:
+            with con.cursor(cursor_factory=NamedTupleCursor) as curs:
                 curs.execute("SET search_path TO thesorimed, public")
                 curs.callproc("thesorimed." + obj_api.name, requete)
                 res = curs.fetchone()
-                print(res[obj_api.name])
 
                 try:
-                    result = res[obj_api.name]
+                    result = getattr(res, obj_api.name).split(', ')
                 except AttributeError:
                     return None
-                print(result)
-                # if result.startswith("<unnamed portal"):
-                f = f'FETCH ALL IN "{result}"'
-                curs.execute(f)
-                result = curs.fetchall()
+
+                if result[0].startswith("<unnamed portal"):
+                    f = f'FETCH ALL IN "{result[0]}"'
+                    curs.execute(f)
+                    result = curs.fetchall()
 
                 return result
+
+    def _appel_proc2(self, obj_api, req):
+
+        if 'str' in obj_api.input_type[0]:
+            requete = self._normalize_req(obj_api, req)
+        else:
+            requete = req
+
+        with self._connect() as con:
+            with con.cursor() as curs:
+                curs.execute("SET search_path TO thesorimed, public")
+                curs.callproc("thesorimed." + obj_api.name, requete)
+                resu = curs.fetchone()
+
+                res = resu[obj_api.name]
+
+                if not res:
+                    return
+
+                if res.startswith("<unnamed portal"):
+                    f = f'FETCH ALL IN "{res}"'
+                    curs.execute(f)
+                    res = curs.fetchall()
+
+                return res
 
     @staticmethod
     def _valide_req(obj, req):
@@ -86,7 +114,8 @@ class ThesoItem:
                 try:
                     int(item)
                 except ValueError:
-                    raise ThesorimedError("L'argument attendu est une liste d'entier")
+                    raise ThesorimedError(
+                        "L'argument attendu est une liste d'entier")
 
         for x, y in zip(obj.input_type, req):
             if x.startswith('int'):
@@ -96,7 +125,8 @@ class ThesoItem:
             longueur_champs = re.findall(r"(?:int|str)([0-9]+)", x)
             if longueur_champs:
                 if y > pow(10, int(longueur_champs[0])):
-                    raise ThesorimedError(f"Longueur de requête limité à {longueur_champs[0]}")
+                    raise ThesorimedError(
+                        f"Longueur de requête limité à {longueur_champs[0]}")
         return True
 
     def proc(self, name, *req):
@@ -112,6 +142,19 @@ class ThesoItem:
 
         return self._appel_proc(obj_api, req)
 
+    def proc2(self, name, *req):
+        """
+        Method de base pour l'appel des procédures
+        """
+        try:
+            obj_api = thesoapi[name]
+        except KeyError:
+            raise ThesorimedError("La procédure appelée n'existe pas")
+
+        self._valide_req(obj_api, req)
+
+        return self._appel_proc2(obj_api, req)
+
     def get_by(self, mode, var):
         """
         Recherche mutli critere sur les noms virtuels et de specialité
@@ -121,54 +164,55 @@ class ThesoItem:
 
         requete = {
             'gsp':
-                """
+            """
                 SELECT gsp_nom, gsp_code_virtuel, gsp_code_sq_pk
                 FROM thesorimed.GSP_GENERIQUE_SPECIALITE g
                 WHERE LOWER(g.gsp_nom) LIKE %s
                 ORDER BY gsp_nom
                 """,
             'spe':
-                """
-                SELECT sp_nom, sp_cipucd, sp_code_sq_pk, sp_gsp_code_fk
-                FROM thesorimed.sp_specialite g
-                WHERE LOWER(g.sp_nom) LIKE %s
+            """
+                SELECT sp_nom, pre_code_pk, sp_code_sq_pk, sp_gsp_code_fk, pre_etat_commer
+                FROM thesorimed.sp_specialite s, thesorimed.pre_presentation p
+                WHERE s.sp_code_sq_pk = p.pre_sp_code_fk
+                AND LOWER(s.sp_nom) LIKE %s
+                AND p.pre_etat_commer = 'D'
                 ORDER BY sp_nom
                 """,
         }
 
         with self._connect() as con:
-            with con.cursor(cursor_factory=DictCursor) as curs:
+            with con.cursor() as curs:
                 curs.execute(requete[mode], (var, ))
                 cc = curs.fetchall()
 
         return cc
-
-
-
-
 
     def gsp_to_valid_spe(self, gsp):
         """
         prend un gsp issu de get_by, trouve une spé commercialisée correspondante
         retourne un dict
         """
-        gsp_code= [x.gsp_code_sq_pk for x in gsp]
+        gsp_code = [x.gsp_code_sq_pk for x in gsp]
 
         groupe_generiques = self.proc('get_the_virtuel', gsp_code, 2)
 
-
         from collections import defaultdict
 
-        dico_generiques_par_gsp = defaultdict(list)  # {codegsp: [{code_spe:spe}, ....]}
+        dico_generiques_par_gsp = defaultdict(
+            list)  # {codegsp: [{code_spe:spe}, ....]}
 
-        [dico_generiques_par_gsp[x.code_gsp].append(x) for x in groupe_generiques]
+        [
+            dico_generiques_par_gsp[x.code_gsp].append(x)
+            for x in groupe_generiques
+        ]
 
         codes_generiques = [x.sp_code_sq_pk for x in groupe_generiques]
 
-
-
-        etat_commer = {i.sp_code_sq_pk : i.etat_commercialisation for i in self.proc('get_the_etat_commer_spe', codes_generiques, 1)}
-
+        etat_commer = {
+            i.sp_code_sq_pk: i.etat_commercialisation
+            for i in self.proc('get_the_etat_commer_spe', codes_generiques, 1)
+        }
 
         final = []
 
@@ -181,9 +225,6 @@ class ThesoItem:
                     break
 
         return final
-
-
-
 
     def fuzzy(
             self,
@@ -198,37 +239,29 @@ class ThesoItem:
         spe = self.get_by('spe', chaine)
 
         # on retire les spes dont le groupe est déjà dans gsp (ex : PARACETAMOL mylan)
-        gsp_codes = [x.gsp_code_sq_pk for x in gsp]  # on extrait les gsp
-        gsp_new_spe = [x for x in spe if x.sp_gsp_code_fk not in gsp_codes]
-
-        # on retire les spes qui ne sont plus commercialisées
-        if gsp_new_spe: 
-            commer_statut = self.proc('get_the_etat_commer_spe', [i.sp_code_sq_pk for i in gsp_new_spe], 1)  # on recupère les infos pour chaque spe
-            commer_statut_by_id  = {i.sp_code_sq_pk : i.etat_commercialisation for i in commer_statut}  # on class statut par id
-            new_spe = [i for i in gsp_new_spe if commer_statut_by_id[i.sp_code_sq_pk] == 'D']
-        else:
-            new_spe= gsp_new_spe
-
+        gsp_codes = [x['gsp_code_sq_pk'] for x in gsp]  # on extrait les gsp
+        gsp_new_spe = [x for x in spe if x['sp_gsp_code_fk'] not in gsp_codes]
 
         # ensuite pour chaque spe ayant le même gspn on garde que la première
         # les None sont gardés car incertain
         spe_restant = []
         gsp_codes_restant = []
-        for x in new_spe:
-            if x.sp_gsp_code_fk is None:
+        for x in gsp_new_spe:
+            if x['sp_gsp_code_fk'] is None:
                 spe_restant.append(x)
                 continue
-            elif x.sp_gsp_code_fk in gsp_codes_restant:
+            elif x['sp_gsp_code_fk'] in gsp_codes_restant:
                 continue
-            gsp_codes_restant.append(x.sp_gsp_code_fk)
+            gsp_codes_restant.append(x['sp_gsp_code_fk'])
             spe_restant.append(x)
 
         # retourne gsp et spe épurés
 
-
         # on recherche un code de spe valable pour ajouter au gsp
-        # gsp_en_dico = gsp
-        gsp_en_dico = self.gsp_to_valid_spe(gsp)
+        gsp_en_dico = gsp
+        # gsp_en_dico = self.gsp_to_valid_spe(gsp)
+        print(len(gsp_en_dico))
 
-
-        return list(chain(gsp_en_dico, spe_restant))
+        # return list(chain(gsp_en_dico, spe_restant))
+        [print(x) for x in list(chain(gsp_en_dico, spe_restant))]
+        print(len(spe), len(gsp_new_spe), len(spe_restant))
