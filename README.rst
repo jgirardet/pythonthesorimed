@@ -1,6 +1,7 @@
-===============================
 pythonthesorimed
-===============================
+#################
+
+
 
 .. image:: https://travis-ci.org/jgirardet/pythonthesorimed.svg?branch=master
     :target: https://travis-ci.org/jgirardet/pythonthesorimed
@@ -10,30 +11,27 @@ pythonthesorimed
 .. image:: https://coveralls.io/repos/github/jgirardet/pythonthesorimed/badge.svg
    :target: https://coveralls.io/github/jgirardet/pythonthesorimed
 .. image:: https://badge.fury.io/py/pythonthesorimed.svg
-   :target: https://pypi.python.org/pypi/pythonthesorimed/
-   :alt: Pypi package
+    :target: https://pypi.python.org/pypi/pythonthesorimed/
+    :alt: Pypi package
 
 
-Interface python pour thesorimed
+**Interface python pour thesorimed**
 
-
-* License : GNU General Public License v3 
-* Documentation: https://pythonthesorimed.readthedocs.org/en/latest/
+* License : *GNU General Public License v3 *
+* `Documentation: <https://pythonthesorimed.readthedocs.org/en/latest/>`_
 * Source: https://github.com/jgirardet/pythonthesorimed
 
 
-Simple Interface Python pour utiliser l'api thesorimed compatible postgresql
-
 
 Features
-=========
+***********
 
 * Génère l'API python depuis le fichier thesormed api.sql
 * Fournit la class ThesoItem pour les appels à la base
 
 
 Installation
-==============
+**************
 
 .. code-block:: shell
 
@@ -42,10 +40,10 @@ Installation
     pip install pythonthesorimed
 
 Usage
-======
+***********
 
 Initialisation
-----------------
+===============
 
 .. code-block:: python
 
@@ -53,7 +51,7 @@ Initialisation
 	session = ThesoItem(host, base, user, password)
 
 Utilisation des API thesorimed
---------------------------------
+================================
 
 result = session.proc('api_name', param1, param2, param3)
 
@@ -71,7 +69,7 @@ par exemple :
 	'RIFADINE 300MG GELULE'
 
 Fuzzy Search
--------------
+==============
 Recheche par nom de tous les groupes de spécialités (gsp) et spécialités selon le motif proposé.
 L'idée est d'épurer un maximum les résutlats afin d'éviter tous les doublons dus notement aux différents laboratoires de génériques. le principe est les suivant :
   - Tout d'abord on récupère les gsp correspondant au motif
@@ -107,8 +105,7 @@ Cloner le dépot puis :
 api.py est maintenant dans pythonthesorimed
 
 Testing
-==========
-
+**********
 make test : toutes les fonctionnalitées ne nécessitant pas le base de donnée thesorimed
 make test-local : tests avec des appels à thesorimed
 make all : tout
@@ -116,6 +113,6 @@ make all : tout
 Travis utilise la version "make test" d'où le coverage plus faible
 
 Coverage
-==========
+***********
 make test-coverage
 make test-coverage-all
