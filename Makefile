@@ -61,8 +61,8 @@ sdist:
 wheels:
 	pipenv run python setup.py bdist_wheel
 
-pypi-publish: build
-	pipenv run python setup.py upload -r pypi
+deploy: build
+	 pipenv run twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
 
 update:
 	pipenv update -d
@@ -100,6 +100,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
+	rm -rf .pytest_cache/
 
 api:
 	pipenv run python build.py api.sql pythonthesorimed

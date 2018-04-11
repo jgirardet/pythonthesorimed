@@ -6,8 +6,6 @@ from pythonthesorimed.api import ProcApi, thesoapi
 from pythonthesorimed.exceptions import ThesorimedError
 from pythonthesorimed.thesoitem import ThesoItem
 
-from .gabarit import fuzzy_result, gsp, spe
-
 instance = ThesoItem("1", "3", "4", "5")
 
 
@@ -21,8 +19,8 @@ class TestValidReq:
         assert ThesoItem._valide_req(thesoapi['get_cip'], [1])
 
     def test_str_int_is_iterable(self):
-        assert ThesoItem._valide_req(thesoapi['get_the_spe_details'],
-                                     [(1, 2), 1])
+        assert ThesoItem._valide_req(thesoapi['get_the_spe_details'], [(1, 2),
+                                                                       1])
 
     def test_str_int_not_iterable_via_int(self):
         with pytest.raises(ThesorimedError) as e:
@@ -30,8 +28,8 @@ class TestValidReq:
         assert str(e.value) == "Le premier argument doit être iterable"
 
     def test_str_int_is_integer_list(self):
-        assert ThesoItem._valide_req(thesoapi['get_the_spe_details'],
-                                     [(1, 2), 1])
+        assert ThesoItem._valide_req(thesoapi['get_the_spe_details'], [(1, 2),
+                                                                       1])
 
     def test_str_int_not_list_of_integer(self):
         with pytest.raises(ThesorimedError) as e:
@@ -59,11 +57,12 @@ class TestValidReq:
         assert ThesoItem._valide_req(thesoapi['get_cip'], [123456])
 
 
-@pytest.mark.parametrize(
-    'name,req,expected',
-    [('get_cons', [1], ['1']), ('get_the_spe_details', [[1], 1], ['1', 1]),
-     ('get_the_info_spe', [[3, 4, 5, 6, 7, 8], 1], ["3,4,5,6,7,8", 1]),
-     ('get_the_code_cim10', ["bla"], ["bla"])])
+@pytest.mark.parametrize('name,req,expected',
+                         [('get_cons', [1], ['1']), ('get_the_spe_details',
+                                                     [[1], 1], ['1', 1]),
+                          ('get_the_info_spe', [[3, 4, 5, 6, 7, 8], 1],
+                           ["3,4,5,6,7,8", 1]), ('get_the_code_cim10', ["bla"],
+                                                 ["bla"])])
 def test_normalize_pass(name, req, expected):
     assert instance._normalize_req(thesoapi[name], req) == expected
 
@@ -82,20 +81,3 @@ def test_proc_raises():
     with pytest.raises(ThesorimedError) as e:
         instance.proc("blabalbal", [1])
     assert str(e.value) == "La procédure appelée n'existe pas"
-
-
-def test_fuzzy(monkeypatch):
-    def f_proc(self, mode, var):
-        if mode == "gsp":
-            return list(gsp)
-        elif mode == "spe":
-            return list(spe)
-
-    monkeypatch.setattr(ThesoItem, 'get_by', f_proc)
-
-    fuzz_mock = fuzzy_result
-    fuzz_instance = instance.fuzzy("paracetamol 1000")
-
-    print(fuzz_mock)
-
-    assert fuzz_instance == fuzz_mock
