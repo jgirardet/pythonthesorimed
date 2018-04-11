@@ -257,3 +257,14 @@ class ThesoItem:
             merged.append(d)
 
         return merged
+
+    def indication_poso(self, code):
+
+        res = self.proc('get_the_poso_v2', [code], 1)
+        forme = self.proc('get_frm', code)
+        
+        def fait_poso(item, forme):
+            chaine = f"{item['ipo_freqmin']} à {item['ipo_freqmax']}  {forme} {item['freq_max']}"
+            return chaine
+
+        return [fait_poso(x, forme[0]) for x in res]
