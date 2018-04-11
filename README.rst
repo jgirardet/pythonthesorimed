@@ -17,7 +17,7 @@ pythonthesorimed
 
 **Interface python pour thesorimed**
 
-* License : *GNU General Public License v3 *
+* License : *GNU General Public License v3*
 * `Documentation: <https://pythonthesorimed.readthedocs.org/en/latest/>`_
 * Source: https://github.com/jgirardet/pythonthesorimed
 
