@@ -5,7 +5,7 @@ MODULE:=pythonthesorimed
 all: dev style checks requirements.txt  build dists doc test-unit test-coverage
 
 dev:
-	pipenv install --dev --python 3.6 --skip-lock
+	pipenv install --dev --python 3.6
 
 install-local:
 	pipenv install --python 3.6
@@ -36,7 +36,7 @@ test-unit:
 	pipenv run pytest 
 
 test-coverage:
-	pipenv run py.test  --cov $(MODULE) --cov-report term-missing --cov-report html
+	pipenv run py.test  tests --cov $(MODULE) --cov-report term-missing --cov-report html
 
 test-local:
 	pipenv run pytest tests_local
