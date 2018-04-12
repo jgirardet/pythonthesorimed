@@ -7,6 +7,10 @@ language: python
 python:
   - 3.6
 
+branches:
+  only:
+  - master
+
 install:
   - pip install -U pip pipenv
   - pip install python-coveralls
@@ -15,7 +19,7 @@ install:
 script:
   - make check
   - make dist
-  - make doc
+  # - make doc
   - make test-unit
   - make test-coverage
 
