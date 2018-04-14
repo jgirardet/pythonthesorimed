@@ -1,3 +1,6 @@
+# Standard Libraries
+from unittest.mock import MagicMock
+
 # Third Party Libraries
 import pytest
 
@@ -5,8 +8,6 @@ import pytest
 from pythonthesorimed.api import ProcApi, thesoapi
 from pythonthesorimed.exceptions import ThesorimedError
 from pythonthesorimed.thesoitem import ThesoItem
-
-from unittest.mock import MagicMock
 
 instance = ThesoItem("1", "3", "4", "5", "6", "7")
 
