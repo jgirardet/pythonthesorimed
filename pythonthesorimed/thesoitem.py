@@ -143,7 +143,7 @@ class ThesoItem:
         Methode pour l'appel des procédures.
 
         :param name: Nom de la procédures en minuscule.
-        :param *req: Arguments en paramêtres.
+        :param req: Arguments en paramêtres.
 
         Pour les méthodes sans curseur:
 
