@@ -22,7 +22,8 @@ base_is_atu = {
     8849: 'N',
 }
 
-instance = ThesoItem("localhost", "thesorimed", "j", "j")
+instance = ThesoItem("localhost", "thesorimed", "j", "j", "theso_id",
+                     "theso_pass")
 
 # test appel_cher
 
@@ -93,44 +94,4 @@ def test_fuzzy_cases():
     assert instance.fuzzy("paracetamol 10"), "fail if no spe"
     assert instance.fuzzy('xarelto'), "one spe hase no gsp"
     assert instance.fuzzy('doliprane'), "gsp empty"
-    assert list(instance.gsp_add_valid_spe(gsp)) == dict_add_valid_spe
-    assert instance.fuzzy('minirin'), "gsp empty"
-
-
-def test_add_spe_valid():
-
-    inst = instance.gsp_add_valid_spe(gsp)
-    addspe = list(dict_add_valid_spe)
-    [x.pop('sp_code_sq_pk') for x in inst]
-    [x.pop('pre_code_pk') for x in inst]
-    [x.pop('sp_code_sq_pk') for x in addspe]
-    [x.pop('pre_code_pk') for x in addspe]
-
-    assert list(inst) == addspe
-
-
-def test_fuzzy_spe_gsp_none(monkeypatch):
-
-    spes = list(spe)
-
-    spes[0]['sp_gsp_code_fk'] = None
-
-    def f_proc(self, mode, var):
-        if mode == "gsp":
-            return list(gsp)
-        elif mode == "spe":
-            return list(spes)
-
-    monkeypatch.setattr(ThesoItem, 'get_by', f_proc)
-
-    inst = instance.fuzzy("paracetamol 1000")
-    fuzt = copy.deepcopy(fuzzy_result)
-
-    fuzt[-1]['gsp_code'] = None
-
-    [x.pop('code') for x in inst]
-    [x.pop('cip') for x in inst]
-    [x.pop('code') for x in fuzt]
-    [x.pop('cip') for x in fuzt]
-
-    assert len(fuzt) + 1 == len(inst)
+    assert list(instance._gsp_add_valid_spe(gsp)) == dict_add_valid_spe

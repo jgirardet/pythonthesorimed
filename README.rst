@@ -22,7 +22,7 @@ Interface python pour thesorimed
 * Source: https://github.com/jgirardet/pythonthesorimed
 
 
-Simple Interface Python pour utiliser l'api thesorimed compatible postgresql
+Simple Interface Python pour utiliser l'api thesorimed compatible postgresql uniquement.
 
 
 Features
@@ -55,7 +55,9 @@ Initialisation
 Utilisation des API thesorimed
 --------------------------------
 
-result = session.proc('api_name', param1, param2, param3)
+.. code-block:: python
+ 
+     result = session.proc('api_name', param1, param2, param3)
 
 Le retour est un Record ou un liste de Record. Record est un object possédant comme attribut les colonnes associées à la requète
 
@@ -109,13 +111,17 @@ api.py est maintenant dans pythonthesorimed
 Testing
 ==========
 
-make test : toutes les fonctionnalitées ne nécessitant pas le base de donnée thesorimed
-make test-local : tests avec des appels à thesorimed
-make all : tout
+``make test`` : toutes les fonctionnalitées ne nécessitant pas le base de donnée thesorimed.
+
+``make test-local`` : tests avec des appels à thesorimed.
+
+``make all`` : tout.
 
 Travis utilise la version "make test" d'où le coverage plus faible
 
 Coverage
 ==========
-make test-coverage
-make test-coverage-all
+
+``make test-coverage``
+
+``make test-coverage-all``

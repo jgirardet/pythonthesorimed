@@ -6,7 +6,9 @@ from pythonthesorimed.api import ProcApi, thesoapi
 from pythonthesorimed.exceptions import ThesorimedError
 from pythonthesorimed.thesoitem import ThesoItem
 
-instance = ThesoItem("1", "3", "4", "5")
+from unittest.mock import MagicMock
+
+instance = ThesoItem("1", "3", "4", "5", "6", "7")
 
 
 class TestValidReq:
@@ -19,8 +21,8 @@ class TestValidReq:
         assert ThesoItem._valide_req(thesoapi['get_cip'], [1])
 
     def test_str_int_is_iterable(self):
-        assert ThesoItem._valide_req(thesoapi['get_the_spe_details'], [(1, 2),
-                                                                       1])
+        assert ThesoItem._valide_req(thesoapi['get_the_spe_details'],
+                                     [(1, 2), 1])
 
     def test_str_int_not_iterable_via_int(self):
         with pytest.raises(ThesorimedError) as e:
@@ -28,8 +30,8 @@ class TestValidReq:
         assert str(e.value) == "Le premier argument doit être iterable"
 
     def test_str_int_is_integer_list(self):
-        assert ThesoItem._valide_req(thesoapi['get_the_spe_details'], [(1, 2),
-                                                                       1])
+        assert ThesoItem._valide_req(thesoapi['get_the_spe_details'],
+                                     [(1, 2), 1])
 
     def test_str_int_not_list_of_integer(self):
         with pytest.raises(ThesorimedError) as e:
@@ -57,12 +59,11 @@ class TestValidReq:
         assert ThesoItem._valide_req(thesoapi['get_cip'], [123456])
 
 
-@pytest.mark.parametrize('name,req,expected',
-                         [('get_cons', [1], ['1']), ('get_the_spe_details',
-                                                     [[1], 1], ['1', 1]),
-                          ('get_the_info_spe', [[3, 4, 5, 6, 7, 8], 1],
-                           ["3,4,5,6,7,8", 1]), ('get_the_code_cim10', ["bla"],
-                                                 ["bla"])])
+@pytest.mark.parametrize(
+    'name,req,expected',
+    [('get_cons', [1], ['1']), ('get_the_spe_details', [[1], 1], ['1', 1]),
+     ('get_the_info_spe', [[3, 4, 5, 6, 7, 8], 1], ["3,4,5,6,7,8", 1]),
+     ('get_the_code_cim10', ["bla"], ["bla"])])
 def test_normalize_pass(name, req, expected):
     assert instance._normalize_req(thesoapi[name], req) == expected
 
@@ -81,3 +82,30 @@ def test_proc_raises():
     with pytest.raises(ThesorimedError) as e:
         instance.proc("blabalbal", [1])
     assert str(e.value) == "La procédure appelée n'existe pas"
+
+
+def test_monographie(monkeypatch):
+    def mk(url, **kwargs):
+        a = MagicMock()
+        if "cip" in url:
+            a.content = b"ok cip"
+        elif "id" in url:
+            a.content = b"ok id"
+        else:  # mimer le mauvais code
+            print("1111")
+            a.content = b"blablablabla Une erreur est survenue f zefzefzefzef"
+        return a
+
+    monkeypatch.setattr("pythonthesorimed.thesoitem.requests.get", mk)
+
+    assert instance.monographie(4521) == "ok id"
+    assert instance.monographie(1234567890123) == "ok cip"
+
+    def mk(url, **kwargs):
+        a = MagicMock()
+        a.content = b"blablablabla Une erreur est survenue f zefzefzefzef"
+        return a
+
+    monkeypatch.setattr("pythonthesorimed.thesoitem.requests.get", mk)
+
+    assert instance.monographie(123456) == False

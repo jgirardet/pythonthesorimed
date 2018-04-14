@@ -7,7 +7,6 @@ verify_ssl = true
 [dev-packages]
 
 "flake8" = "*"
-yapf = "*"
 isort = "*"
 cryptography = "*"
 pyyaml = "*"
@@ -23,6 +22,7 @@ pytest-pythonpath = "*"
 pytest-timeit = "*"
 ipython = "*"
 twine = "*"
+sphinx-rtd-theme = "*"
 
 
 [packages]
@@ -30,3 +30,4 @@ twine = "*"
 pbr = ">=3.0"
 "psycopg2-binary" = "*"
 yapf = "*"
+requests = "*"

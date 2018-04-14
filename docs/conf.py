@@ -22,8 +22,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../pythonthesorimed'))
-
+# sys.path.insert(0, os.path.abspath('../pythonthesorimed'))
 
 # -- General configuration ------------------------------------------------
 
@@ -89,7 +88,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -143,8 +142,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    ('index', 'pythonthesorimed.tex',
-     'pythonthesorimed Documentation',
+    ('index', 'pythonthesorimed.tex', 'pythonthesorimed Documentation',
      'Jimmy Girardet', 'manual'),
 ]
 
@@ -152,8 +150,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [('index', 'pythonthesorimed',
-              'pythonthesorimed Documentation',
+man_pages = [('index', 'pythonthesorimed', 'pythonthesorimed Documentation',
               ['Jimmy Girardet'], 1)]
 
 # -- Options for Texinfo output -------------------------------------------
@@ -162,10 +159,9 @@ man_pages = [('index', 'pythonthesorimed',
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'pythonthesorimed',
-     'pythonthesorimed Documentation',
-     'Jimmy Girardet', 'pythonthesorimed',
-     'One line description of project.', 'Miscellaneous'),
+    ('index', 'pythonthesorimed', 'pythonthesorimed Documentation',
+     'Jimmy Girardet', 'pythonthesorimed', 'One line description of project.',
+     'Miscellaneous'),
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.
